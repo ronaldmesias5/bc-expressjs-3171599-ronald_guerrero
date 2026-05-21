@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DeviceStatus {
+  PENDING
+  IN_REPAIR
+  COMPLETED
+  DELIVERED
+}
+
+enum RepairStatus {
+  SCHEDULED
+  IN_PROGRESS
+  FINISHED
+  CANCELED
+}
+
+enum PartCategory {
+  ELECTRICAL
+  MECHANICAL
+  GENERAL
+}
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String
+  address   String?
+  createdAt DateTime @default(now())
+}
+
+model Device {
+  id           Int          @id @default(autoincrement())
+  brand        String
+  model        String
+  customerName String
+  customerPhone String
+  issue        String
+  status       DeviceStatus @default(PENDING)
+  estimatedCost Float?
+  finalCost    Float?
+  entryDate    DateTime     @default(now())
+  exitDate     DateTime?
+  createdAt    DateTime     @default(now())
+  repairs      Repair[]
+}
+
+model Part {
+  id               Int          @id @default(autoincrement())
+  name             String
+  category         PartCategory
+  price            Float
+  stock            Int
+  compatibleBrands String[]
+  supplier         String?
+  createdAt        DateTime     @default(now())
+}
+
+model Repair {
+  id             Int          @id @default(autoincrement())
+  deviceId       Int
+  device         Device       @relation(fields: [deviceId], references: [id])
+  description    String
+  technician     String
+  status         RepairStatus @default(SCHEDULED)
+  startDate      DateTime     @default(now())
+  estimatedEnd   DateTime?
+  actualEnd      DateTime?
+  cost           Float?
+  createdAt      DateTime     @default(now())
+}
